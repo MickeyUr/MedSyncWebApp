@@ -26,11 +26,11 @@ async def get_bookings(dialog_manager: DialogManager, repo: RequestsRepo, **kwar
                 ("👨‍⚕️" if booking.Doctor else "🔬")
                 + (
                     f"{booking.Booking.booking_time.strftime('%d %B')}"
-                    + (
-                        f" - {booking.Diagnostic.type_name}"
-                        if booking.Diagnostic
-                        else f" - {booking.Doctor.full_name}"
-                    )
+                    # + (
+                    #     f" - {booking.Diagnostic.type_name}"
+                    #     if booking.Diagnostic
+                    #     else f" - {booking.Doctor.full_name}"
+                    # )
                 ),
                 booking.Booking.booking_id,
             )
@@ -47,9 +47,10 @@ async def get_booking_info(dialog_manager: DialogManager, repo: RequestsRepo, **
     booking_time = booking_info.Booking.booking_time.strftime("%d %B %Y, %H:%M UTC")
 
     appointment_type_text = (
-        f"👨‍⚕️ Doctor: {booking_info.Doctor.full_name}\n"
-        if booking_info.Doctor
-        else f"🔬 Diagnostic: {booking_info.Diagnostic.type_name}\n"
+        f"👨‍⚕️ Doctor: \n"
+        # f"👨‍⚕️ Doctor: {booking_info.Doctor.full_name}\n"
+        # if booking_info.Doctor
+        # else f"🔬 Diagnostic: {booking_info.Diagnostic.type_name}\n"
     )
 
     return {
@@ -75,7 +76,7 @@ async def show_booking(
 
 booking_dialog = Dialog(
     Window(
-        Const("Here is your booking list. Select one to see details"),
+        Const("Ось ваш список бронювань. Оберіть один, щоб переглянути деталі"),
         ScrollingGroup(
             Select(
                 Format("{item[0]}"),
@@ -89,14 +90,14 @@ booking_dialog = Dialog(
             height=10,
             hide_on_single_page=True,
         ),
-        Cancel(Const("Exit"), on_click=start_from_dialog_menu),
+        Cancel(Const("⬅️ Назад"), on_click=start_from_dialog_menu),
         getter=get_bookings,
         state=MyBookings.show_list,
     ),
     Window(
         Const("Here is your booking details\n\n"),
         Format("{text}"),
-        Back(Const("Back")),
+        Back(Const("⬅️ Назад")),
         getter=get_booking_info,
         state=MyBookings.show_booking,
     ),
