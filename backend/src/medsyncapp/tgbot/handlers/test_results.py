@@ -124,6 +124,8 @@ class MyResult(StatesGroup):
     show_calendar_default = State()
     show_calendar_custom = State()
     show_time = State()
+    show_booking1 = State()
+    show_booking2 = State()
 
 async def get_results(dialog_manager: DialogManager, repo: RequestsRepo, **kwargs):
     results = await repo.diagnostics.get_all_diagnostic_types()
@@ -164,58 +166,139 @@ async def show_result(
     #     await repo.results.save_file_id(int(result_id), msg.document.file_id)
 
 async def get_booking_info(dialog_manager: DialogManager, repo: RequestsRepo, **kwargs):
-    bookings = await repo.diagnostics.get_locations_by_type(dialog_manager.middleware_data.get("booking_id"))
-    print(bookings)
-    return {
-        "bookings": [
-            (f"📋 Booking ID: ")
-        ]
-    }
+    # bookings = await repo.diagnostics.get_locations_by_type(dialog_manager.middleware_data.get("booking_id"))
+    bookings = await repo.diagnostics.get_locations_by_type(4)
 
-    return {
-        "text": (
-            f"📋 Booking ID: "
-            f"Thank you for choosing our service! If you have any questions or need to reschedule, feel free to reach out. 📞"
-        )
-    }
+    # [{
+    #     "location_id": 3,
+    #     "name": "Carroll-Mcclain",
+    #     "address": "USNS Mcknight\nFPO AA 3894"
+    # }, {
+    #     "location_id": 1,
+    #     "name": "Key Ltd",
+    #     "address": "05459 John Station\nNew Br"
+    # }, {
+    #     "location_id": 2,
+    #     "name": "Serrano LLC",
+    #     "address": "Unit 6408 Box 4458\nDPO AA"
+    # }]
+
     return {
         "bookings": [
             (
                 (
-                        f"{booking.Location.name}"
+                        f"{booking.name}"
                 ),
-                booking.Location.location_id,
+                booking.location_id,
             )
             for booking in bookings
         ]
     }
+
+async def get_booking_info2(dialog_manager: DialogManager, repo: RequestsRepo, **kwargs):
+    book_repo = repo.doctors
+
+    booking_id = await book_repo.book_slot(
+        {
+            "user_name": "John",
+            "user_surname": "Dou",
+            "user_email": "test@test.test",
+            "user_phone": "1964",
+            "user_message": "user_message",
+            "diagnostic_id": 4,
+            "location_id": 1,
+            "booking_date_time": "9:00"
+        }, user_id=391153922
+    )
+    # await DialogManager.answer(str(booking_id))
+
+    repo: RequestsRepo = dialog_manager.middleware_data.get("repo")
+
+    booking_info = await repo.bookings.get_booking(int(booking_id))
+
+    booking_time = booking_info.Booking.booking_time.strftime("%d %B %Y, %H:%M UTC")
+
+    appointment_type_text = (
+        f"👨‍⚕️ Doctor:\n"
+        # if booking_info.Doctor
+        f"🔬 Diagnostic: {booking_time}\n"
+        # else f"🔬 Diagnostic: {booking_info.Diagnostic.type_name}\n"
+    )
+
+    return {
+        "text": (
+            f"📋 Booking ID: {booking_info.Booking.booking_id}\n"
+            f"{appointment_type_text}"
+            f"📆 Date & Time: {booking_time}\n\n"
+            f"📍 Location: {booking_info.Location.name}: {booking_info.Location.address}\n\n"
+            f"Thank you for choosing our service! If you have any questions or need to reschedule, feel free to reach out. 📞"
+        )
+    }
+
 async def get_time_info(dialog_manager: DialogManager, repo: RequestsRepo, **kwargs):
-    working_hours = await repo.slots.get_working_hours(2)
+    working_hours = await repo.slots.get_working_hours(1)
+    # [{
+    #     "weekday_index": 0,
+    #     "start_time": 11,
+    #     "created_at": "2023-10-10T18:12:26.245697",
+    #     "location_id": 1,
+    #     "working_hour_id": 1,
+    #     "end_time": 20
+    # }, {
+    #     "weekday_index": 1,
+    #     "start_time": 9,
+    #     "created_at": "2023-10-10T18:12:26.245697",
+    #     "location_id": 1,
+    #     "working_hour_id": 2,
+    #     "end_time": 18
+    # }, {
+    #     "weekday_index": 2,
+    #     "start_time": 10,
+    #     "created_at": "2023-10-10T18:12:26.245697",
+    #     "location_id": 1,
+    #     "working_hour_id": 3,
+    #     "end_time": 19
+    # }, {
+    #     "weekday_index": 3,
+    #     "start_time": 9,
+    #     "created_at": "2023-10-10T18:12:26.245697",
+    #     "location_id": 1,
+    #     "working_hour_id": 4,
+    #     "end_time": 18
+    # }, {
+    #     "weekday_index": 4,
+    #     "start_time": 9,
+    #     "created_at": "2023-10-10T18:12:26.245697",
+    #     "location_id": 1,
+    #     "working_hour_id": 5,
+    #     "end_time": 18
+    # }, {
+    #     "weekday_index": 5,
+    #     "start_time": 9,
+    #     "created_at": "2023-10-10T18:12:26.245697",
+    #     "location_id": 1,
+    #     "working_hour_id": 6,
+    #     "end_time": 18
+    # }]
+
     # bookings = await repo.diagnostics.get_locations_by_type(dialog_manager.middleware_data.get("booking_id"))
-    print(working_hours)
+
+
     if not working_hours:
         return []
     return {
         "times": [
             (
                 (
-                    f"{working_hour.start_time}"
+                    f"{working_hour}:00 - {working_hour+1}:00"
                 ),
-                working_hour.location_id,
+                working_hour,
             )
-            for working_hour in working_hours
+            for working_hour in range(working_hours[0].start_time, working_hours[0].end_time)
         ]
     }
     # await DialogManager.answer(str(working_hours))
-    return {
-        "times": [
-            ("10:00 - 11:00"),
-            ("11:00 - 12:00"),
-            ("12:00 - 13:00"),
-            ("14:00 - 15:00"),
-            ("15:00 - 16:00")
-        ]
-    }
+    # {time.getHours()}: 00 - {time.getHours() + 1}:00
 
 async def show_time(
     callback_query: types.CallbackQuery,
@@ -230,6 +313,14 @@ async def show_time(
     # dialog_manager.dialog_data.update(booking_id=result_id)
     await dialog_manager.switch_to(MyResult.show_time)
     # await dialog_manager.switch_to(MyResult.show_booking)
+
+async def show_booking2(
+        callback: ChatEvent, widget: ManagedCalendar,
+        dialog_manager: DialogManager,
+        selected_date: date, /
+):
+    # await callback.answer(str(selected_date))
+    await dialog_manager.switch_to(MyResult.show_booking2)
 
 async def show_booking(
     callback_query: types.CallbackQuery,
@@ -270,7 +361,7 @@ test_results_dialog = Dialog(
             height=10,
             hide_on_single_page=True,
         ),
-        Cancel(Const("Exit"), on_click=start_from_dialog_menu),
+        Cancel(Const("⬅️ Назад"), on_click=start_from_dialog_menu),
         getter=get_results,
         state=MyResult.show_list,
     ),
@@ -290,7 +381,7 @@ test_results_dialog = Dialog(
             height=10,
             hide_on_single_page=True,
         ),
-        Back(Const("Back")),
+        Back(Const("⬅️ Назад")),
         getter=get_booking_info,
         state=MyResult.show_result,
     ),
@@ -310,7 +401,7 @@ test_results_dialog = Dialog(
             height=10,
             hide_on_single_page=True,
         ),
-        Back(Const("Back")),
+        Back(Const("⬅️ Назад")),
         getter=get_booking_info,
         state=MyResult.show_booking,
     ),
@@ -330,12 +421,12 @@ test_results_dialog = Dialog(
     #     state=MyResult.show_calendar_main,
     # ),
     Window(
-        Const("Default calendar widget"),
+        Const("Оберіть ваш вільний день📆"),
         Calendar(
             id="cal",
             on_click=on_date_clicked,
         ),
-        Back(Const("Back")),
+        Back(Const("⬅️ Назад")),
         state=MyResult.show_calendar_default,
     ),
     # Window(
@@ -353,7 +444,7 @@ test_results_dialog = Dialog(
     #     state=MyResult.show_calendar_custom,
     # ),
     Window(
-        Const("Оберіть час:\n\n"),
+        Const("Оберіть ваш вільний час 🕑\n\n"),
         # Format("{text}"),
         ScrollingGroup(
             Select(
@@ -361,16 +452,23 @@ test_results_dialog = Dialog(
                 id="s_result3",
                 item_id_getter=operator.itemgetter(1),
                 items="times",
-                on_click=show_time,
+                on_click=show_booking2,
             ),
             id="scroll_results3",
             width=1,
             height=10,
             hide_on_single_page=True,
         ),
-        Back(Const("Back")),
+        Back(Const("⬅️ Назад")),
         getter=get_time_info,
         state=MyResult.show_time,
+    ),
+    Window(
+        Const("Here is your booking details\n\n"),
+        Format("{text}"),
+        Cancel(Const("Exit"), on_click=start_from_dialog_menu),
+        getter=get_booking_info2,
+        state=MyResult.show_booking2,
     ),
 )
 
