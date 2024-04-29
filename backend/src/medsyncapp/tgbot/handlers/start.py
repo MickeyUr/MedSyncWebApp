@@ -13,8 +13,8 @@ start_router = Router()
 @start_router.message(CommandStart())
 async def send_webapp(message: types.Message, config: Config):
     await message.answer(
-        "Welcome to MedSync App!\n\n"
-        "You can use our Web App to book an appointment with a doctor, or get tested in one of our clinics.",
+        "👋 Це бот нашої стайні. Він допоможе тобі скористатися нашими послугами\n\n"
+        "Оберіть потрібний вам пункт",
         reply_markup=main_menu(domain=config.tg_bot.web_app_domain),
     )
 
@@ -24,7 +24,7 @@ async def start_from_dialog_menu(
 ):
     config: Config = dialog_manager.middleware_data.get("config")
     await callback_query.message.answer(
-        "Welcome to MedSync App!\n\n"
-        "You can use our Web App to book an appointment with a doctor, or get tested in one of our clinics.",
+        "👋 Це бот нашої стайні. Він допоможе тобі скористатися нашими послугами\n\n"
+        "Оберіть потрібний вам пункт",
         reply_markup=main_menu(domain=config.tg_bot.web_app_domain),
     )

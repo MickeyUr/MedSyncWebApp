@@ -75,7 +75,7 @@ async def show_booking(
 
 booking_dialog = Dialog(
     Window(
-        Const("Here is your booking list. Select one to see details"),
+        Const("Ось ваш список бронювань. Оберіть один, щоб переглянути деталі"),
         ScrollingGroup(
             Select(
                 Format("{item[0]}"),

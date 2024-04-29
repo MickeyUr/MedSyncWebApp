@@ -7,6 +7,7 @@ from medsyncapp.infrastructure.database.repo.diagnostics import DiagnosticRepo
 from medsyncapp.infrastructure.database.repo.doctors import DoctorRepo
 from medsyncapp.infrastructure.database.repo.locations import LocationsRepo
 from medsyncapp.infrastructure.database.repo.results import ResultsRepo
+# from medsyncapp.infrastructure.database.repo.categories import CategoryRepo
 from medsyncapp.infrastructure.database.repo.slots import SlotRepo
 from medsyncapp.infrastructure.database.repo.users import UserRepo
 
@@ -48,3 +49,7 @@ class RequestsRepo:
     @property
     def results(self) -> ResultsRepo:
         return ResultsRepo(self.session)
+
+    # @property
+    # def categories(self) -> CategoryRepo:
+    #     return CategoryRepo(self.session)

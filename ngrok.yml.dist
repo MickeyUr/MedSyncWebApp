@@ -1,7 +1,7 @@
 version: 2
-authtoken: <your-ngrok-token>
+authtoken: 2aHS1CF5aoxdHhXLrqG3CAqESEU_2gWmEaHGHqx4o9FqbLkdx
 tunnels:
   first:
     addr: app:5173
     proto: http
-    hostname: your-ngrok-hostname.ngrok-free.app
+    hostname: adequately-novel-bullfrog.ngrok-free.app
