@@ -27,3 +27,12 @@ def main_menu(domain: str):
     return kb.as_markup()
 
 
+# а вот фильтр
+# class IsAdmin(BoundFilter):
+#     async def check(self, message: types.Message):
+#         if str(message.from_user.id) in admins:
+#             return True
+#         else:
+#             return False
+# # список id админов
+# admins = [123, 321]

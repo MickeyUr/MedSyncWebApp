@@ -7,6 +7,8 @@ from aiogram_dialog import DialogManager
 from medsyncapp.tgbot.config import Config
 from medsyncapp.tgbot.keyboards.inline import main_menu
 
+# from medsyncapp.tgbot.filters.is_admin import IsAdmin
+
 start_router = Router()
 
 
